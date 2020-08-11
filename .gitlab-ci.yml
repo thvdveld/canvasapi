@@ -1,0 +1,89 @@
+---
+
+stages:
+  - build
+  - test
+  - deploy
+
+.rust: &rust
+  variables:
+    CARGO_HOME: $CI_PROJECT_DIR/cargo
+  cache:
+    paths:
+      - cargo/
+      - target/
+  before_script:
+    - cargo --version
+    - rustc --version
+
+.rust-stable: &rust-stable
+  <<: *rust
+  image: rust
+  cache:
+    key: stable
+
+.rust-nightly: &rust-nightly
+  <<: *rust
+  image: rustlang/rust:nightly
+  cache:
+    key: nightly
+
+rust-stable-build:
+  <<: *rust-stable
+  stage: build
+  script:
+    - cargo build --release --all-features
+
+rust-stable-documentation:
+  <<: *rust-stable
+  stage: build
+  script:
+    - cargo rustdoc
+  artifacts:
+    paths:
+      - target/doc
+
+rust-nightly-build:
+  <<: *rust-nightly
+  stage: build
+  script:
+    - cargo build --all-features
+    - cargo build --release --all-features
+
+rust-stable-test:
+  <<: *rust-stable
+  stage: test
+  script:
+    - cargo test --all-features
+    - cargo test --release --all-features
+
+rust-nightly-test:
+  <<: *rust-nightly
+  stage: test
+  script:
+    - cargo test --all-features
+    - cargo test --release --all-features
+
+coverage-nightly:
+  image: xd009642/tarpaulin:develop-nightly
+  stage: test
+  before_script:
+    - apt-get update
+    - apt-get install -y pkg-config libssl-dev
+  script:
+    - cargo tarpaulin -v
+
+pages:
+  image: debian
+  stage: deploy
+  dependencies:
+    - rust-stable-documentation
+  only:
+    - master
+  script:
+    - echo "Copying files!"
+    - mkdir -p public
+    - cp --recursive target/doc/* public/
+  artifacts:
+    paths:
+      - public
