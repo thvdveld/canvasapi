@@ -1,38 +1,51 @@
 use crate::canvas::Canvas;
 use crate::parameters::*;
 
+use std::marker::PhantomData;
+
+pub struct GetObjectResponse<Output>(Output)
+where
+    Output: serde::de::DeserializeOwned;
+
+impl<Output> GetObjectResponse<Output>
+where
+    Output: serde::de::DeserializeOwned,
+{
+    pub fn inner(self) -> Output {
+        self.0
+    }
+}
+
 /// An object for get requests.
-pub struct GetObjectRequest<'i, Output>
+pub struct GetObjectRequest<Output>
 where
     Output: serde::de::DeserializeOwned,
 {
     url: String,
-    canvas: &'i Canvas,
     parameters: Vec<RequestParameter>,
-    inner: Option<Output>,
+    output: PhantomData<Output>,
 }
 
-impl<'i, Output> GetObjectRequest<'i, Output>
+impl<Output> GetObjectRequest<Output>
 where
     Output: serde::de::DeserializeOwned,
 {
     /// Create a new get request object with an correct url.
-    pub fn new(url: String, canvas: &'i Canvas) -> Self {
+    pub fn new(url: String) -> Self {
         Self {
             url,
-            canvas,
             parameters: vec![],
-            inner: None,
+            output: PhantomData,
         }
     }
 
     /// Do a get request.
     pub async fn fetch(
         mut self,
-    ) -> Result<GetObjectRequest<'i, Output>, Box<dyn std::error::Error>> {
-        let resp = self
-            .canvas
-            .get_request(self.canvas.add_url_prefix(&self.url))
+        canvas: &Canvas,
+    ) -> Result<GetObjectResponse<Output>, Box<dyn std::error::Error>> {
+        let resp = canvas
+            .get_request(canvas.add_url_prefix(&self.url))
             .send()
             .await
             .unwrap()
@@ -40,44 +53,37 @@ where
             .await
             .unwrap();
 
-        self.inner = Some(resp);
-        Ok(self)
-    }
-
-    /// Get the result.
-    pub fn inner(self) -> Option<Output> {
-        self.inner
+        Ok(GetObjectResponse(resp))
     }
 }
 
-pub struct GetPagedObjectRequest<'i, Output>
+pub struct GetPagedObjectRequest<Output>
 where
     Output: serde::de::DeserializeOwned,
 {
     url: String,
-    canvas: &'i Canvas,
     parameters: Vec<RequestParameter>,
-    inner: Option<Vec<Output>>,
+    output: PhantomData<Vec<Output>>,
 }
 
-impl<'i, Output> GetPagedObjectRequest<'i, Output>
+impl<Output> GetPagedObjectRequest<Output>
 where
     Output: serde::de::DeserializeOwned + std::fmt::Debug,
 {
-    pub fn new(url: String, canvas: &'i Canvas) -> Self {
+    pub fn new(url: String) -> Self {
         Self {
             url,
-            canvas,
             parameters: vec![],
-            inner: None,
+            output: PhantomData,
         }
     }
 
     pub async fn fetch(
         mut self,
-    ) -> Result<GetPagedObjectRequest<'i, Output>, Box<dyn std::error::Error>> {
+        canvas: &Canvas,
+    ) -> Result<GetObjectResponse<Vec<Output>>, Box<dyn std::error::Error>> {
         let mut output: Vec<Output> = vec![];
-        let mut url: String = self.canvas.add_url_prefix(&self.url);
+        let mut url: String = canvas.add_url_prefix(&self.url);
 
         if self.parameters.len() > 0 {
             url = format!("{}?", url);
@@ -93,7 +99,7 @@ where
         }
 
         loop {
-            let mut client = self.canvas.get_request(url);
+            let mut client = canvas.get_request(url);
 
             let mut resp = client.send().await.unwrap();
             let headers = resp.headers().clone();
@@ -109,18 +115,12 @@ where
             };
         }
 
-        self.inner = Some(output);
-
-        Ok(self)
+        Ok(GetObjectResponse(output))
     }
 
     pub fn add_parameter(mut self, parameter: impl Into<RequestParameter>) -> Self {
         self.parameters.push(parameter.into());
         self
-    }
-
-    pub fn inner(self) -> Option<Vec<Output>> {
-        self.inner
     }
 }
 

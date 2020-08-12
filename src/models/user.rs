@@ -12,4 +12,5 @@ pub struct User {
     pub integration_id: Option<String>,
     pub login_id: Option<String>,
     pub email: Option<String>,
+    pub avatar_url: Option<String>,
 }

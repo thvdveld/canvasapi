@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::canvas::Canvas;
 use crate::models::prelude::*;
 use crate::parameters::*;
+
 use crate::requests::*;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -58,70 +59,32 @@ pub struct Course {
 }
 
 impl Course {
+    /// Returns a list of active courses for the current user.
+    pub fn courses() -> GetPagedObjectRequest<Course> {
+        GetPagedObjectRequest::<Course>::new(format!("courses"))
+    }
+
     /// Get a course with a specific Canvas ID.
-    pub fn with_id<'i>(canvas: &'i Canvas, id: usize) -> GetObjectRequest<'_, Course> {
-        GetObjectRequest::<Course>::new(format!("courses/{}", id), canvas)
+    pub fn with_id(id: usize) -> GetObjectRequest<Course> {
+        GetObjectRequest::<Course>::new(format!("courses/{}", id))
     }
 
     /// Get all the users from the course.
     /// This includes: teachers, students, teacher assistants...
-    pub fn get_users<'i>(self, canvas: &Canvas) -> GetPagedObjectRequest<'_, User> {
-        GetPagedObjectRequest::<User>::new(format!("courses/{}/search_users", self.id), canvas)
+    pub fn get_users(self) -> GetPagedObjectRequest<User> {
+        GetPagedObjectRequest::<User>::new(format!("courses/{}/search_users", self.id))
     }
 
     /// Get only the students from the course.
-    pub fn get_students(self, canvas: &Canvas) -> GetPagedObjectRequest<'_, User> {
+    pub fn get_students(self, canvas: &Canvas) -> GetPagedObjectRequest<User> {
         let mut req =
-            GetPagedObjectRequest::<User>::new(format!("courses/{}/search_users", self.id), canvas);
+            GetPagedObjectRequest::<User>::new(format!("courses/{}/search_users", self.id));
 
         req.add_parameter(EnrollmentType::Student)
     }
-}
 
-pub enum EnrollmentType {
-    Teacher,
-    Student,
-    StudentView,
-    TA,
-    Observer,
-    Designer,
-}
-
-impl Into<RequestParameter> for EnrollmentType {
-    fn into(self) -> RequestParameter {
-        RequestParameter {
-            name: "enrollment_type[]".into(),
-            value: match self {
-                EnrollmentType::Teacher => "teacher",
-                EnrollmentType::Student => "student",
-                EnrollmentType::StudentView => "student_view",
-                EnrollmentType::TA => "ta",
-                EnrollmentType::Observer => "observer",
-                EnrollmentType::Designer => "designer",
-            }
-            .into(),
-        }
-    }
-}
-
-pub enum SortOn {
-    Username,
-    LastLogin,
-    Email,
-    SisId,
-}
-
-impl Into<RequestParameter> for SortOn {
-    fn into(self) -> RequestParameter {
-        RequestParameter {
-            name: "sort".into(),
-            value: match self {
-                SortOn::Username => "username",
-                SortOn::LastLogin => "last_login",
-                SortOn::Email => "email",
-                SortOn::SisId => "sis_id",
-            }
-            .into(),
-        }
+    /// Get all the assignments of a course.
+    pub fn get_assignments(self) -> GetPagedObjectRequest<Assignment> {
+        GetPagedObjectRequest::<Assignment>::new(format!("courses/{}/assignments", self.id))
     }
 }

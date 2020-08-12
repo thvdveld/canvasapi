@@ -16,6 +16,8 @@ impl Canvas {
         format!("{}/api/v1/{}", self.base_url, url)
     }
 
+    /// Create a client for a get request.
+    /// This adds the url and the token.
     pub(crate) fn get_request(&self, url: String) -> actix_web::client::ClientRequest {
         actix_web::client::Client::new()
             .get(&url)
