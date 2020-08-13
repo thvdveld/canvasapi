@@ -44,6 +44,7 @@ where
         mut self,
         canvas: &Canvas,
     ) -> Result<GetObjectResponse<Output>, Box<dyn std::error::Error>> {
+        println!("{}", self.url);
         let resp = canvas
             .get_request(canvas.add_url_prefix(&self.url))
             .send()
@@ -146,4 +147,42 @@ fn get_next_url<'i>(resp: &'i actix_web::http::HeaderMap) -> Option<&'i str> {
 
         None
     }
+}
+
+macro_rules! api_get {
+    (
+        $(#[$outer:meta])*
+        $name:ident ($($self:ident)?):
+            get $path:expr =>
+            ($($self_val:ident),*) -> ($($path_val:ident: $path_ty:ty),*)
+            -> $ret_ty:ident
+            $([$($param_val:expr),*])?
+    ) => {
+        $(#[$outer])*
+        pub fn $name($($self,)? $($path_val:$path_ty,)*) -> GetObjectRequest<$ret_ty> {
+            GetObjectRequest::<$ret_ty>::new(
+                format!($path
+                    $(,$self_val=$self.$self_val)*
+                    $(,$path_val=$path_val)*))
+            $($(.add_parameter($param_val))*)?
+        }
+    };
+
+    (
+        $(#[$outer:meta])*
+        $name:ident ($($self:ident)?):
+            get $path:expr =>
+            ($($self_val:ident),*) -> ($($path_val:ident: $path_ty:ty),*)
+            -> [$ret_ty:ident]
+            $([$($param_val:expr),*])?
+    ) => {
+        $(#[$outer])*
+        pub fn $name($($self,)? $($path_val:$path_ty,)*) -> GetPagedObjectRequest<$ret_ty> {
+            GetPagedObjectRequest::<$ret_ty>::new(
+                format!($path
+                    $(,$self_val=$self.$self_val)*
+                    $(,$path_val=$path_val)*))
+            $($(.add_parameter($param_val))*)?
+        }
+    };
 }

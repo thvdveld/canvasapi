@@ -12,6 +12,8 @@ async fn get_students() {
     let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
 
     let canvas = Canvas::new(base_url, canvas_token);
+    // let course = Course::with_id(13369).fetch(&canvas).await.unwrap().inner();
+
     let course = Course::with_id(13369).fetch(&canvas).await.unwrap().inner();
 
     let users = course

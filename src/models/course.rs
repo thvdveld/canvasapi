@@ -59,32 +59,40 @@ pub struct Course {
 }
 
 impl Course {
-    /// Returns a list of active courses for the current user.
-    pub fn courses() -> GetPagedObjectRequest<Course> {
-        GetPagedObjectRequest::<Course>::new(format!("courses"))
+    api_get! {
+        /// Get all courses from the current user.
+        courses():
+            get "courses" =>
+            () -> () -> [Course]
     }
 
-    /// Get a course with a specific Canvas ID.
-    pub fn with_id(id: usize) -> GetObjectRequest<Course> {
-        GetObjectRequest::<Course>::new(format!("courses/{}", id))
+    api_get! {
+        /// Get a course with a specific Canvas ID.
+        with_id():
+            get "courses/{id}" =>
+            () -> (id: usize) -> Course
     }
 
-    /// Get all the users from the course.
-    /// This includes: teachers, students, teacher assistants...
-    pub fn get_users(self) -> GetPagedObjectRequest<User> {
-        GetPagedObjectRequest::<User>::new(format!("courses/{}/search_users", self.id))
+    api_get! {
+        /// Get all the users from the course.
+        /// This includes: teachers, students, teacher assistants...
+        get_users(self):
+            get "courses/{id}/search_users" =>
+            (id) -> () -> [User]
     }
 
-    /// Get only the students from the course.
-    pub fn get_students(self, canvas: &Canvas) -> GetPagedObjectRequest<User> {
-        let mut req =
-            GetPagedObjectRequest::<User>::new(format!("courses/{}/search_users", self.id));
-
-        req.add_parameter(EnrollmentType::Student)
+    api_get! {
+        /// Get only the students from the course.
+        get_students(self):
+            get "courses/{id}/search_users" =>
+            (id) -> () -> [User]
+            [EnrollmentType::Student]
     }
 
-    /// Get all the assignments of a course.
-    pub fn get_assignments(self) -> GetPagedObjectRequest<Assignment> {
-        GetPagedObjectRequest::<Assignment>::new(format!("courses/{}/assignments", self.id))
+    api_get! {
+        /// Get all the assignments of a course.
+        get_assignments(self):
+            get "courses/{id}/assignments" =>
+            (id) -> () -> [Assignment]
     }
 }
