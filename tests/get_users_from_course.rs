@@ -39,28 +39,28 @@ async fn get_courses() {
     let courses = Course::courses().fetch(&canvas).await.unwrap().inner();
 }
 
-#[tokio::test]
-async fn get_assignments() {
-    dotenv().ok();
+// #[tokio::test]
+// async fn get_assignments() {
+// dotenv().ok();
 
-    let base_url = std::env::var("CANVAS_BASE_URL").unwrap();
-    let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
+// let base_url = std::env::var("CANVAS_BASE_URL").unwrap();
+// let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
 
-    let canvas = CanvasInformation::new(base_url, canvas_token);
+// let canvas = CanvasInformation::new(base_url, canvas_token);
 
-    let course = Canvas::get_course(13312)
-        .fetch(&canvas)
-        .await
-        .unwrap()
-        .inner();
+// let course = Canvas::get_course(13312)
+// .fetch(&canvas)
+// .await
+// .unwrap()
+// .inner();
 
-    let assignments = course
-        .get_assignments()
-        .fetch(&canvas)
-        .await
-        .unwrap()
-        .inner();
-}
+// let assignments = course
+// .get_assignments()
+// .fetch(&canvas)
+// .await
+// .unwrap()
+// .inner();
+// }
 
 #[tokio::test]
 async fn get_files() {
