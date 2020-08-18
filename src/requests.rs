@@ -1,4 +1,4 @@
-use crate::canvas::Canvas;
+use crate::canvas::CanvasInformation;
 use crate::parameters::*;
 
 use std::marker::PhantomData;
@@ -42,9 +42,8 @@ where
     /// Do a get request.
     pub async fn fetch(
         mut self,
-        canvas: &Canvas,
+        canvas: &CanvasInformation,
     ) -> Result<GetObjectResponse<Output>, Box<dyn std::error::Error>> {
-        println!("{}", self.url);
         let resp = canvas
             .get_request(canvas.add_url_prefix(&self.url))
             .send()
@@ -81,7 +80,7 @@ where
 
     pub async fn fetch(
         mut self,
-        canvas: &Canvas,
+        canvas: &CanvasInformation,
     ) -> Result<GetObjectResponse<Vec<Output>>, Box<dyn std::error::Error>> {
         let mut output: Vec<Output> = vec![];
         let mut url: String = canvas.add_url_prefix(&self.url);
@@ -126,7 +125,7 @@ where
 }
 
 /// Get the next url for paging from the header information.
-fn get_next_url<'i>(resp: &'i actix_web::http::HeaderMap) -> Option<&'i str> {
+fn get_next_url<'i>(resp: &'i reqwest::header::HeaderMap) -> Option<&'i str> {
     let headers = resp.get("link");
     if headers.is_none() {
         None
@@ -149,20 +148,34 @@ fn get_next_url<'i>(resp: &'i actix_web::http::HeaderMap) -> Option<&'i str> {
     }
 }
 
+macro_rules! api_todo {
+    (
+        $(#[$outer:meta])*
+        $name:ident($($self:ident)?)
+    ) => {
+        $(#[$outer])*
+        #[doc(hidden)]
+        pub fn $name($(&$self)?) {
+            unimplemented!();
+        }
+    };
+}
+
 macro_rules! api_get {
     (
         $(#[$outer:meta])*
         $name:ident ($($self:ident)?):
-            get $path:expr =>
-            ($($self_val:ident),*) -> ($($path_val:ident: $path_ty:ty),*)
+            $path:expr =>
+            ($($named_self_arg:ident : $named_self_val:expr),*)
+            -> ($($path_val:ident: $path_ty:ty),*)
             -> $ret_ty:ident
             $([$($param_val:expr),*])?
     ) => {
         $(#[$outer])*
-        pub fn $name($($self,)? $($path_val:$path_ty,)*) -> GetObjectRequest<$ret_ty> {
+        pub fn $name($(&$self,)? $($path_val:$path_ty,)*) -> GetObjectRequest<$ret_ty> {
             GetObjectRequest::<$ret_ty>::new(
                 format!($path
-                    $(,$self_val=$self.$self_val)*
+                    $(,$named_self_arg=$named_self_val)*
                     $(,$path_val=$path_val)*))
             $($(.add_parameter($param_val))*)?
         }
@@ -171,16 +184,17 @@ macro_rules! api_get {
     (
         $(#[$outer:meta])*
         $name:ident ($($self:ident)?):
-            get $path:expr =>
-            ($($self_val:ident),*) -> ($($path_val:ident: $path_ty:ty),*)
+            $path:expr =>
+            ($($named_self_arg:ident : $named_self_val:expr),*)
+            -> ($($path_val:ident: $path_ty:ty),*)
             -> [$ret_ty:ident]
             $([$($param_val:expr),*])?
     ) => {
         $(#[$outer])*
-        pub fn $name($($self,)? $($path_val:$path_ty,)*) -> GetPagedObjectRequest<$ret_ty> {
+        pub fn $name($(&$self,)? $($path_val:$path_ty,)*) -> GetPagedObjectRequest<$ret_ty> {
             GetPagedObjectRequest::<$ret_ty>::new(
                 format!($path
-                    $(,$self_val=$self.$self_val)*
+                    $(,$named_self_arg=$named_self_val)*
                     $(,$path_val=$path_val)*))
             $($(.add_parameter($param_val))*)?
         }

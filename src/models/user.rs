@@ -14,3 +14,9 @@ pub struct User {
     pub email: Option<String>,
     pub avatar_url: Option<String>,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserDisplay {
+    pub id: usize,
+    pub display_name: Option<String>,
+}

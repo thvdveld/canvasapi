@@ -1,5 +1,10 @@
 use serde::{Deserialize, Serialize};
 
+use crate::canvas::CanvasInformation;
+use crate::models::prelude::*;
+use crate::parameters::*;
+use crate::requests::*;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Assignment {
     pub id: Option<usize>,
@@ -69,4 +74,44 @@ pub struct Assignment {
     pub anonymous_grading: Option<bool>,
     pub allowed_attemts: Option<usize>,
     pub post_manually: Option<bool>,
+}
+
+impl Assignment {
+    api_get! {
+        /// List students eligible to submit this assignment.
+        get_gradeable_students(self):
+            "courses/{course_id}/assignments/{id}/gradeable_students" =>
+            (course_id: self.course_id.clone().unwrap(),
+             id: self.id.clone().unwrap())
+                -> () -> [UserDisplay]
+    }
+
+    api_get! {
+        /// Get a single submission, based on user id.
+        get_submission(self):
+             "courses/{course_id}/assignments/{id}/submissions/{user_id}" =>
+            (course_id: self.course_id.clone().unwrap(), id: self.id.clone().unwrap())
+                -> (user_id: usize) -> Submission
+    }
+
+    api_get! {
+        /// Get all existing submissions for this assignment.
+        get_submissions(self):
+            "courses/{course_id}/assignments/{id}/submissions" =>
+            (course_id: self.course_id.clone().unwrap(),
+            id: self.id.clone().unwrap())
+                -> () -> [Submission]
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AssignmentGroup {
+    pub id: usize,
+    pub name: Option<String>,
+    pub position: Option<usize>,
+    pub group_weight: Option<usize>,
+    pub sis_source_id: Option<String>,
+    // pub integration_data: usize,
+    pub assignments: Option<Vec<usize>>,
+    // pub rules: usize,
 }

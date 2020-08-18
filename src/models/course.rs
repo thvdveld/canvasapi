@@ -1,6 +1,8 @@
+//! Model for managing course information.
+
 use serde::{Deserialize, Serialize};
 
-use crate::canvas::Canvas;
+use crate::canvas::CanvasInformation;
 use crate::models::prelude::*;
 use crate::parameters::*;
 
@@ -59,40 +61,115 @@ pub struct Course {
 }
 
 impl Course {
-    api_get! {
-        /// Get all courses from the current user.
-        courses():
-            get "courses" =>
-            () -> () -> [Course]
+    api_todo! {
+        /// Create a new grading standard for the course.
+        add_grading_standards(self)
+    }
+
+    api_todo! {
+        /// Mark this course as concluded.
+        conclude(self)
+    }
+
+    api_todo! {
+        /// Create a new assignment for this course.
+        ///
+        /// Note: the assignment is created in the active state.
+        create_assignment(self)
+    }
+
+    api_todo! {
+        /// Create a new assignment group for this course.
+        create_assignment_group(self)
+    }
+
+    api_todo! {
+        /// Create the specified overrides for each assignment.
+        create_assignment_overrides(self)
     }
 
     api_get! {
-        /// Get a course with a specific Canvas ID.
-        with_id():
-            get "courses/{id}" =>
-            () -> (id: usize) -> Course
+        /// Get all courses from the current user.
+        courses():
+            "courses" =>
+            () -> () -> [Course]
+    }
+
+    // api_get! {
+    // /// Get a course with a specific Canvas ID.
+    // with_id():
+    // "courses/{id}" =>
+    // () -> (id: usize) -> Course
+    // }
+
+    api_get! {
+        /// Get all outcome links for context - BETA
+        get_all_outcome_links_in_context(self):
+            "courses/{id}/outcome_group_links" =>
+                (id: self.id) -> () -> [String]
+    }
+
+    api_get! {
+        /// Return the assignment with the given id.
+        get_assignment(self):
+            "courses/{id}/assignments/{assignment_id}" =>
+                (id: self.id) -> (assignment_id: usize) -> Assignment
+    }
+
+    api_get! {
+        /// Retrieve specified assignment group for the specified course.
+        get_assignment_group(self):
+            "courses/{id}/assignment_groups/{assignment_group_id}" =>
+                (id: self.id) -> (assignment_group_id: usize) -> AssignmentGroup
+    }
+
+    api_get! {
+        /// List assignment groups for the specified course.
+        get_assignment_groups(self):
+            "course/{id}/assignment_groups" =>
+                (id: self.id) -> () -> [AssignmentGroup]
+    }
+
+    api_todo! {
+        /// List the specified overrides in this course, providing they target
+        /// sections/groups/students visible to the current user.
+        get_assignment_overrides(self)
+    }
+
+    api_get! {
+        /// Get all the assignments of a course.
+        get_assignments(self):
+            "courses/{id}/assignments" =>
+            (id: self.id) -> () -> [Assignment]
+    }
+
+    api_get! {
+        /// Returns a list of assignments for the given assignment group.
+        get_assignments_for_group(self):
+            "courses/{id}/assignment_groups/{assignment_group_id}/assignments" =>
+                (id: self.id) -> (assignment_group_id: usize) -> [Assignment]
     }
 
     api_get! {
         /// Get all the users from the course.
         /// This includes: teachers, students, teacher assistants...
         get_users(self):
-            get "courses/{id}/search_users" =>
-            (id) -> () -> [User]
+            "courses/{id}/search_users" =>
+            (id: self.id) -> () -> [User]
     }
 
     api_get! {
         /// Get only the students from the course.
         get_students(self):
-            get "courses/{id}/search_users" =>
-            (id) -> () -> [User]
+            "courses/{id}/search_users" =>
+            (id: self.id) -> () -> [User]
             [EnrollmentType::Student]
     }
 
     api_get! {
-        /// Get all the assignments of a course.
-        get_assignments(self):
-            get "courses/{id}/assignments" =>
-            (id) -> () -> [Assignment]
+        /// Get all the files of a course.
+        get_files(self):
+            "courses/{id}/files" =>
+            (id: self.id) -> () -> [File]
     }
 }
