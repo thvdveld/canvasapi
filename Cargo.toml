@@ -9,6 +9,10 @@ homepage = "https://gitlab.com/thvdveld/canvasapi"
 documentation = "https://thvdveld.gitlab.io/canvasapi/canvasapi/"
 keywords = ["rest", "api"]
 description = "Canvas LMS REST API"
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

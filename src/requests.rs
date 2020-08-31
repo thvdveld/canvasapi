@@ -43,7 +43,7 @@ where
     pub async fn fetch(
         mut self,
         canvas: &CanvasInformation,
-    ) -> Result<GetObjectResponse<Output>, Box<dyn std::error::Error>> {
+    ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
         let resp = canvas
             .get_request(canvas.add_url_prefix(&self.url))
             .send()
@@ -81,7 +81,7 @@ where
     pub async fn fetch(
         mut self,
         canvas: &CanvasInformation,
-    ) -> Result<GetObjectResponse<Vec<Output>>, Box<dyn std::error::Error>> {
+    ) -> Result<GetObjectResponse<Vec<Output>>, anyhow::Error> {
         let mut output: Vec<Output> = vec![];
         let mut url: String = canvas.add_url_prefix(&self.url);
 
