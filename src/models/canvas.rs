@@ -1,3 +1,5 @@
+//! Model for accessing root level API requests.
+
 use serde::{Deserialize, Serialize};
 
 use crate::canvas::CanvasInformation;
@@ -6,6 +8,7 @@ use crate::parameters::*;
 
 use crate::requests::*;
 
+/// Model for accessing root level API requests.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Canvas;
 

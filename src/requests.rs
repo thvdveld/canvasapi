@@ -40,9 +40,9 @@ where
     }
 
     /// Do a get request.
-    pub async fn fetch(
+    pub async fn fetch<'i>(
         mut self,
-        canvas: &CanvasInformation,
+        canvas: &CanvasInformation<'i>,
     ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
         let resp = canvas
             .get_request(canvas.add_url_prefix(&self.url))
@@ -78,9 +78,9 @@ where
         }
     }
 
-    pub async fn fetch(
+    pub async fn fetch<'i>(
         mut self,
-        canvas: &CanvasInformation,
+        canvas: &CanvasInformation<'i>,
     ) -> Result<GetObjectResponse<Vec<Output>>, anyhow::Error> {
         let mut output: Vec<Output> = vec![];
         let mut url: String = canvas.add_url_prefix(&self.url);

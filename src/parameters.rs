@@ -1,3 +1,33 @@
+//! Parameters that can be passed with a request.
+//!
+//! # Example
+//!
+//! For example, the `EnrollmentType` is added as a parameter, which will return only the students
+//! for the specific course.
+//! To know which parameters can be used for a request, the official Canvas LMS API documentation
+//! needs to be consulted.
+//!
+//! ```
+//! # use canvasapi::prelude::*;
+//! # #[tokio::test]
+//! # async fn parameter_test() {
+//! #   dotenv::dotenv().ok();
+//! #   let base_url = std::env::var("CANVAS_BASE_URL").unwrap();
+//! #   let cvs_token = std::env::var("CANAVS_ACCESS_TOKEN").unwrap();
+//! #   let canvas = CanvasInformation::new(&base_url, &cvs_token);
+//! #   let course = Canvas::get_course(13369)
+//! #       .fetch(&canvas)
+//! #       .await
+//! #       .unwrap()
+//! #       .inner();
+//!
+//! let students = course
+//!     .get_users()
+//!     .add_parameter(EnrollmentType::Student)
+//!     .fetch(&canvas).await.unwrap().inner();
+//! #   }
+//! ```
+
 /// Parameter that can be added to a request.
 pub struct RequestParameter {
     pub name: String,

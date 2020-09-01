@@ -1,3 +1,5 @@
+//! Model for accessing user information.
+
 use crate::canvas::*;
 use serde::{Deserialize, Serialize};
 

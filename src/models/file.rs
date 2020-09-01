@@ -1,3 +1,5 @@
+//! Model for managing files with Canvas.
+
 use serde::{Deserialize, Serialize};
 
 use crate::canvas::CanvasInformation;
@@ -32,9 +34,9 @@ pub struct File {
 }
 
 impl File {
-    pub async fn download(
+    pub async fn download<'i>(
         &self,
-        canvas: &CanvasInformation,
+        canvas: &CanvasInformation<'i>,
         path: &str,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let url = self.url.clone().unwrap();

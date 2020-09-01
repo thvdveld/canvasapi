@@ -10,7 +10,7 @@ async fn get_students() {
     let base_url = std::env::var("CANVAS_BASE_URL").unwrap();
     let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
 
-    let canvas = CanvasInformation::new(base_url, canvas_token);
+    let canvas = CanvasInformation::new(&base_url, &canvas_token);
 
     let course = Canvas::get_course(13369)
         .fetch(&canvas)
@@ -18,7 +18,7 @@ async fn get_students() {
         .unwrap()
         .inner();
 
-    let users = course
+    let _ = course
         .get_users()
         .add_parameter(EnrollmentType::Student)
         .fetch(&canvas)
@@ -34,9 +34,9 @@ async fn get_courses() {
     let base_url = std::env::var("CANVAS_BASE_URL").unwrap();
     let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
 
-    let canvas = CanvasInformation::new(base_url, canvas_token);
+    let canvas = CanvasInformation::new(&base_url, &canvas_token);
 
-    let courses = Course::courses().fetch(&canvas).await.unwrap().inner();
+    let _ = Course::courses().fetch(&canvas).await.unwrap().inner();
 }
 
 #[tokio::test]
@@ -46,7 +46,7 @@ async fn get_assignments() {
     let base_url = std::env::var("CANVAS_BASE_URL").unwrap();
     let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
 
-    let canvas = CanvasInformation::new(base_url, canvas_token);
+    let canvas = CanvasInformation::new(&base_url, &canvas_token);
 
     let course = Canvas::get_course(13312)
         .fetch(&canvas)
@@ -54,7 +54,7 @@ async fn get_assignments() {
         .unwrap()
         .inner();
 
-    let assignments = course
+    let _ = course
         .get_assignments()
         .fetch(&canvas)
         .await
@@ -69,7 +69,7 @@ async fn get_files() {
     let base_url = std::env::var("CANVAS_BASE_URL").unwrap();
     let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
 
-    let canvas = CanvasInformation::new(base_url, canvas_token);
+    let canvas = CanvasInformation::new(&base_url, &canvas_token);
 
     let course = Canvas::get_course(13312)
         .fetch(&canvas)

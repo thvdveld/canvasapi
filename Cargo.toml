@@ -1,15 +1,17 @@
 [package]
 name = "canvasapi"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Thibaut Vandervelden <thvdveld@vub.be>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/thvdveld/canvasapi"
 homepage = "https://gitlab.com/thvdveld/canvasapi"
 documentation = "https://thvdveld.gitlab.io/canvasapi/canvasapi/"
-keywords = ["rest", "api"]
+keywords = ["rest", "api", "Canvas LMS"]
 description = "Canvas LMS REST API"
+readme = "README.md"
 include = [
+    "**/*.md",
     "**/*.rs",
     "Cargo.toml",
 ]

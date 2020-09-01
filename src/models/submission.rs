@@ -1,3 +1,5 @@
+//! Model for accessing submission information.
+
 use serde::{Deserialize, Serialize};
 
 use crate::canvas::CanvasInformation;

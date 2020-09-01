@@ -1,3 +1,5 @@
+//! Models for accessing information about assignments.
+
 use serde::{Deserialize, Serialize};
 
 use crate::canvas::CanvasInformation;
