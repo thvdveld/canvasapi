@@ -4,9 +4,9 @@ This is the (unofficial) Rust version of the library for accessing the Canvas LM
 The documentation of the official API can be found
 [here](https://canvas.instructure.com/doc/api/).
 
-This client that is used for making the calls is [reqwest]().
+This client that is used for making the calls is [reqwest](https://crates.io/crates/reqwest).
 The API calls are by default asynchronous.
-The [Tokio]() runtime is used for the tests.
+The [Tokio](https://crates.io/crates/tokio) runtime is used for the tests.
 
 ## Feature flags
 
