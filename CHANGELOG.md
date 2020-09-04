@@ -11,6 +11,9 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### v0.2.1 (2020-09-04)
+- `[added]` `blocking` feature. This disables the asynchronous calls.
+
 ### v0.2.0 (2020-09-01)
 - `[changed]` `CanvasInformation` now accepts `&str` instead of `String`.
 - `[added]` Documentation is added to the libary.

@@ -34,6 +34,7 @@ pub struct File {
 }
 
 impl File {
+    #[cfg(not(feature = "blocking"))]
     pub async fn download<'i>(
         &self,
         canvas: &CanvasInformation<'i>,
@@ -50,6 +51,22 @@ impl File {
             .bytes()
             .await
             .unwrap();
+
+        std::fs::write(format!("{}/{}", path, name), resp).expect("failed to copy the content");
+
+        Ok(())
+    }
+
+    #[cfg(feature = "blocking")]
+    pub fn download<'i>(
+        &self,
+        canvas: &CanvasInformation<'i>,
+        path: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let url = self.url.clone().unwrap();
+        let name = self.filename.clone().unwrap();
+
+        let mut resp = canvas.get_request(url).send().unwrap().bytes().unwrap();
 
         std::fs::write(format!("{}/{}", path, name), resp).expect("failed to copy the content");
 

@@ -28,8 +28,16 @@ impl<'i> CanvasInformation<'i> {
 
     /// Create a client for a get request.
     /// This adds the url and the token.
+    #[cfg(not(feature = "blocking"))]
     pub(crate) fn get_request(&self, url: String) -> reqwest::RequestBuilder {
         reqwest::Client::new().get(&url).bearer_auth(self.token)
+    }
+
+    #[cfg(feature = "blocking")]
+    pub(crate) fn get_request(&self, url: String) -> reqwest::blocking::RequestBuilder {
+        reqwest::blocking::Client::new()
+            .get(&url)
+            .bearer_auth(self.token)
     }
 
     pub(crate) fn get_token(&self) -> &str {

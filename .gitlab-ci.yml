@@ -32,6 +32,7 @@ rust-stable-build:
   <<: *rust-stable
   stage: build
   script:
+    - cargo build --release
     - cargo build --release --all-features
 
 rust-stable-documentation:
@@ -47,6 +48,7 @@ rust-nightly-build:
   <<: *rust-nightly
   stage: build
   script:
+    - cargo build --features "devel"
     - cargo build --all-features
     - cargo build --release --all-features
 
@@ -61,6 +63,7 @@ rust-nightly-test:
   <<: *rust-nightly
   stage: test
   script:
+    - cargo test --features "devel"
     - cargo test --all-features
     - cargo test --release --all-features
 

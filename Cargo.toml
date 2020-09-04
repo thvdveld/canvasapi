@@ -1,13 +1,13 @@
 [package]
 name = "canvasapi"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Thibaut Vandervelden <thvdveld@vub.be>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 repository = "https://gitlab.com/thvdveld/canvasapi"
 homepage = "https://gitlab.com/thvdveld/canvasapi"
 documentation = "https://thvdveld.gitlab.io/canvasapi/canvasapi/"
-keywords = ["rest", "api"]
+keywords = ["rest", "api", "lms"]
 description = "Canvas LMS REST API"
 readme = "README.md"
 include = [
@@ -15,6 +15,16 @@ include = [
     "**/*.rs",
     "Cargo.toml",
 ]
+
+[features]
+default = [
+    "tokio/full",
+    "reqwest/json",
+]
+
+blocking = ["reqwest/blocking"]
+
+devel = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

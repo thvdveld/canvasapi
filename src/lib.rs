@@ -1,6 +1,15 @@
 //! This is the (unofficial) Rust version of the library for accessing the Canvas LMS API.
-//! The official documentation of the API can be found
+//! The documentation of the official API can be found
 //! [here](https://canvas.instructure.com/doc/api/).
+//!
+//! This client that is used for making the calls is [reqwest]().
+//! The API calls are by default asynchronous.
+//! The [Tokio]() runtime is used for the tests.
+//!
+//! # Feature flags
+//!
+//! - `blocking`: enables blocking requests.
+//! - `devel`: enables functions that are still in development.
 //!
 //! # Quickstart
 //!
@@ -23,7 +32,7 @@
 //! # }
 //! ```
 //!
-//! # Notes
+//! # Contributing
 //!
 //! This crate only supports GET requests, and not all of them are implemented.
 //! Only the ones I use are implemented.
@@ -59,6 +68,19 @@
 //!             "courses/{id}/search_users" =>
 //!                 (id: self.id) -> () -> [User]
 //!                 [EnrollmentType::Student]
+//!     }
+//!
+//!     api_get! {
+//!         /// This is still in development.
+//!         function_in_developmen():
+//!             "test" =>
+//!                 () -> () -> Test
+//!             features = [(name = "devel", reason = "Function is not ready yet.")]
+//!     }
+//!
+//!     api_todo! {
+//!         /// This function still needs to be fully implemented.
+//!         function_that_is_todo()
 //!     }
 //! }
 //! ```
