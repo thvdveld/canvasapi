@@ -35,9 +35,9 @@ pub struct File {
 
 impl File {
     #[cfg(not(feature = "blocking"))]
-    pub async fn download<'i>(
+    pub async fn download(
         &self,
-        canvas: &CanvasInformation<'i>,
+        canvas: &CanvasInformation<'_>,
         path: &str,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let url = self.url.clone().unwrap();
@@ -58,9 +58,9 @@ impl File {
     }
 
     #[cfg(feature = "blocking")]
-    pub fn download<'i>(
+    pub fn download(
         &self,
-        canvas: &CanvasInformation<'i>,
+        canvas: &CanvasInformation<'_>,
         path: &str,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let url = self.url.clone().unwrap();

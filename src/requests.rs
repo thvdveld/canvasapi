@@ -43,9 +43,9 @@ where
     }
 
     #[cfg(feature = "blocking")]
-    pub fn fetch<'i>(
+    pub fn fetch(
         mut self,
-        canvas: &CanvasInformation<'i>,
+        canvas: &CanvasInformation<'_>,
     ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
         let resp: std::collections::HashMap<String, String> = canvas
             .get_request(canvas.add_url_prefix(&self.url))
@@ -60,9 +60,9 @@ where
     }
 
     #[cfg(not(feature = "blocking"))]
-    pub async fn fetch<'i>(
+    pub async fn fetch(
         mut self,
-        canvas: &CanvasInformation<'i>,
+        canvas: &CanvasInformation<'_>,
     ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
         let resp: std::collections::HashMap<String, String> = canvas
             .get_request(canvas.add_url_prefix(&self.url))
@@ -103,9 +103,9 @@ where
     }
 
     #[cfg(feature = "blocking")]
-    pub fn fetch<'i>(
+    pub fn fetch(
         mut self,
-        canvas: &CanvasInformation<'i>,
+        canvas: &CanvasInformation<'_>,
     ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
         let resp = canvas
             .get_request(canvas.add_url_prefix(&self.url))
@@ -118,9 +118,9 @@ where
     }
 
     #[cfg(not(feature = "blocking"))]
-    pub async fn fetch<'i>(
+    pub async fn fetch(
         mut self,
-        canvas: &CanvasInformation<'i>,
+        canvas: &CanvasInformation<'_>,
     ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
         let resp = canvas
             .get_request(canvas.add_url_prefix(&self.url))
@@ -157,9 +157,9 @@ where
     }
 
     #[cfg(feature = "blocking")]
-    pub fn fetch<'i>(
+    pub fn fetch(
         mut self,
-        canvas: &CanvasInformation<'i>,
+        canvas: &CanvasInformation<'_>,
     ) -> Result<GetObjectResponse<Vec<Output>>, anyhow::Error> {
         let mut output: Vec<Output> = vec![];
         let mut url: String = canvas.add_url_prefix(&self.url);
@@ -198,14 +198,14 @@ where
     }
 
     #[cfg(not(feature = "blocking"))]
-    pub async fn fetch<'i>(
+    pub async fn fetch(
         mut self,
-        canvas: &CanvasInformation<'i>,
+        canvas: &CanvasInformation<'_>,
     ) -> Result<GetObjectResponse<Vec<Output>>, anyhow::Error> {
         let mut output: Vec<Output> = vec![];
         let mut url: String = canvas.add_url_prefix(&self.url);
 
-        if self.parameters.len() > 0 {
+        if !self.parameters.is_empty() {
             url = format!("{}?", url);
             let mut first = true;
             for parameter in &self.parameters {
@@ -245,25 +245,25 @@ where
 }
 
 /// Get the next url for paging from the header information.
-fn get_next_url<'i>(resp: &'i reqwest::header::HeaderMap) -> Option<&'i str> {
+fn get_next_url(resp: &reqwest::header::HeaderMap) -> Option<&str> {
     let headers = resp.get("link");
-    if headers.is_none() {
-        None
-    } else {
-        let headers = headers.unwrap().to_str().unwrap();
-        let headers: Vec<&str> = headers.split(",").map(|x| x.trim()).collect();
+    if let Some(headers) = headers {
+        let headers = headers.to_str().unwrap();
+        let headers: Vec<&str> = headers.split(',').map(|x| x.trim()).collect();
 
         for header in headers {
             if header.contains("next") {
                 return Some(
                     header
-                        .split(";")
+                        .split(';')
                         .map(|x| &x[1..x.len() - 1])
                         .collect::<Vec<&str>>()[0],
                 );
             }
         }
 
+        None
+    } else {
         None
     }
 }
