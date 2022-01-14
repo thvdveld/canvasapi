@@ -16,6 +16,7 @@
 //! #   let cvs_token = std::env::var("CANAVS_ACCESS_TOKEN").unwrap();
 //! #   let canvas = CanvasInformation::new(&base_url, &cvs_token);
 //! #   let course = Canvas::get_course(13369)
+//! #       .unwrap()
 //! #       .fetch(&canvas)
 //! #       .await
 //! #       .unwrap()
@@ -23,6 +24,7 @@
 //!
 //! let students = course
 //!     .get_users()
+//!     .unwrap()
 //!     .add_parameter(EnrollmentType::Student)
 //!     .fetch(&canvas).await.unwrap().inner();
 //! #   }
@@ -51,11 +53,11 @@ macro_rules! api_parameter {
             )*
         }
 
-        impl Into<RequestParameter> for $name {
-            fn into(self) -> RequestParameter {
+        impl From<$name> for RequestParameter {
+            fn from(value: $name) -> Self {
                 RequestParameter {
                     name: $name_output.into(),
-                    value: match self {
+                    value: match value {
                         $(<$name>::$option => $option_output,)*
                     }.into(),
                 }
@@ -70,15 +72,14 @@ macro_rules! api_parameter {
         $(#[$outer])*
         pub struct $name<'i>(pub &'i str);
 
-        impl<'i> Into<RequestParameter> for $name<'i> {
-            fn into(self) -> RequestParameter {
+        impl<'i> From<$name<'i>> for RequestParameter {
+            fn from(value: $name) -> Self {
                 RequestParameter {
                     name: $name_output.into(),
-                    value: self.0.into(),
+                    value: value.0.into(),
                 }
             }
         }
-
     };
 }
 

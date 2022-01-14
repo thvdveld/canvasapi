@@ -41,6 +41,6 @@ impl<'i> CanvasInformation<'i> {
     }
 
     pub(crate) fn get_token(&self) -> &str {
-        &self.token
+        self.token
     }
 }

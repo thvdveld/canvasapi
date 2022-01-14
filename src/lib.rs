@@ -27,8 +27,7 @@
 //! let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
 //!
 //! let canvas = CanvasInformation::new(&base_url, &canvas_token);
-//!
-//! let course = Canvas::get_course(13369).fetch(&canvas).await.unwrap().inner();
+//! let course = Canvas::get_course(13369).unwrap().fetch(&canvas).await.unwrap().inner();
 //! # }
 //! ```
 //!
