@@ -1,7 +1,8 @@
+use anyhow::anyhow;
+use std::marker::PhantomData;
+
 use crate::canvas::CanvasInformation;
 use crate::parameters::*;
-
-use std::marker::PhantomData;
 
 pub struct GetObjectResponse<Output>(Output)
 where
@@ -46,15 +47,15 @@ where
     pub fn fetch(
         mut self,
         canvas: &CanvasInformation<'_>,
-    ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
+    ) -> anyhow::Result<GetObjectResponse<Output>> {
         let resp: std::collections::HashMap<String, String> = canvas
             .get_request(canvas.add_url_prefix(&self.url))
-            .send()
-            .unwrap()
-            .json()
-            .unwrap();
+            .send()?
+            .json()?;
 
-        let val: Output = resp[&self.key].parse().unwrap();
+        let val: Output = resp[&self.key]
+            .parse()
+            .map_err(|_| anyhow!("Failed to parse output"))?;
 
         Ok(GetObjectResponse(val))
     }
@@ -63,17 +64,17 @@ where
     pub async fn fetch(
         mut self,
         canvas: &CanvasInformation<'_>,
-    ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
+    ) -> anyhow::Result<GetObjectResponse<Output>> {
         let resp: std::collections::HashMap<String, String> = canvas
             .get_request(canvas.add_url_prefix(&self.url))
             .send()
-            .await
-            .unwrap()
+            .await?
             .json()
-            .await
-            .unwrap();
+            .await?;
 
-        let val: Output = resp[&self.key].parse().unwrap();
+        let val: Output = resp[&self.key]
+            .parse()
+            .map_err(|_| anyhow!("Failed to parse output"))?;
 
         Ok(GetObjectResponse(val))
     }
@@ -106,13 +107,11 @@ where
     pub fn fetch(
         mut self,
         canvas: &CanvasInformation<'_>,
-    ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
+    ) -> anyhow::Result<GetObjectResponse<Output>> {
         let resp = canvas
             .get_request(canvas.add_url_prefix(&self.url))
-            .send()
-            .unwrap()
-            .json::<Output>()
-            .unwrap();
+            .send()?
+            .json::<Output>()?;
 
         Ok(GetObjectResponse(resp))
     }
@@ -121,15 +120,13 @@ where
     pub async fn fetch(
         mut self,
         canvas: &CanvasInformation<'_>,
-    ) -> Result<GetObjectResponse<Output>, anyhow::Error> {
+    ) -> anyhow::Result<GetObjectResponse<Output>> {
         let resp = canvas
             .get_request(canvas.add_url_prefix(&self.url))
             .send()
-            .await
-            .unwrap()
+            .await?
             .json::<Output>()
-            .await
-            .unwrap();
+            .await?;
 
         Ok(GetObjectResponse(resp))
     }
@@ -160,7 +157,7 @@ where
     pub fn fetch(
         mut self,
         canvas: &CanvasInformation<'_>,
-    ) -> Result<GetObjectResponse<Vec<Output>>, anyhow::Error> {
+    ) -> anyhow::Result<GetObjectResponse<Vec<Output>>> {
         let mut output: Vec<Output> = vec![];
         let mut url: String = canvas.add_url_prefix(&self.url);
 
@@ -169,10 +166,14 @@ where
             let mut first = true;
             for parameter in &self.parameters {
                 if first {
-                    url = format!("{}{}={}", url, parameter.name, parameter.value);
+                    let name = &parameter.name;
+                    let value = &parameter.value;
+                    url = format!("{url}{name}={value}");
                     first = false;
                 } else {
-                    url = format!("{}&{}={}", url, parameter.name, parameter.value);
+                    let name = &parameter.name;
+                    let value = &parameter.value;
+                    url = format!("{url}&{name}={value}");
                 }
             }
         }
@@ -180,12 +181,12 @@ where
         loop {
             let mut client = canvas.get_request(url);
 
-            let mut resp = client.send().unwrap();
+            let mut resp = client.send()?;
             let headers = resp.headers().clone();
 
-            let next_url = get_next_url(&headers);
+            let next_url = get_next_url(&headers)?;
 
-            output.extend(resp.json::<Vec<Output>>().unwrap());
+            output.extend(resp.json::<Vec<Output>>()?);
 
             url = if next_url.is_none() {
                 break;
@@ -201,7 +202,7 @@ where
     pub async fn fetch(
         mut self,
         canvas: &CanvasInformation<'_>,
-    ) -> Result<GetObjectResponse<Vec<Output>>, anyhow::Error> {
+    ) -> anyhow::Result<GetObjectResponse<Vec<Output>>> {
         let mut output: Vec<Output> = vec![];
         let mut url: String = canvas.add_url_prefix(&self.url);
 
@@ -210,10 +211,14 @@ where
             let mut first = true;
             for parameter in &self.parameters {
                 if first {
-                    url = format!("{}{}={}", url, parameter.name, parameter.value);
+                    let name = &parameter.name;
+                    let value = &parameter.value;
+                    url = format!("{url}{name}={value}");
                     first = false;
                 } else {
-                    url = format!("{}&{}={}", url, parameter.name, parameter.value);
+                    let name = &parameter.name;
+                    let value = &parameter.value;
+                    url = format!("{url}&{name}={value}");
                 }
             }
         }
@@ -221,12 +226,12 @@ where
         loop {
             let mut client = canvas.get_request(url);
 
-            let mut resp = client.send().await.unwrap();
+            let mut resp = client.send().await?;
             let headers = resp.headers().clone();
 
-            let next_url = get_next_url(&headers);
+            let next_url = get_next_url(&headers)?;
 
-            output.extend(resp.json::<Vec<Output>>().await.unwrap());
+            output.extend(resp.json::<Vec<Output>>().await?);
 
             url = if next_url.is_none() {
                 break;
@@ -245,26 +250,26 @@ where
 }
 
 /// Get the next url for paging from the header information.
-fn get_next_url(resp: &reqwest::header::HeaderMap) -> Option<&str> {
+fn get_next_url(resp: &reqwest::header::HeaderMap) -> anyhow::Result<Option<&str>> {
     let headers = resp.get("link");
     if let Some(headers) = headers {
-        let headers = headers.to_str().unwrap();
+        let headers = headers.to_str()?;
         let headers: Vec<&str> = headers.split(',').map(|x| x.trim()).collect();
 
         for header in headers {
             if header.contains("next") {
-                return Some(
+                return Ok(Some(
                     header
                         .split(';')
                         .map(|x| &x[1..x.len() - 1])
                         .collect::<Vec<&str>>()[0],
-                );
+                ));
             }
         }
 
-        None
+        Ok(None)
     } else {
-        None
+        Ok(None)
     }
 }
 
@@ -293,7 +298,7 @@ macro_rules! api_get {
         $(#[$outer:meta])*
         $name:ident ($($self:ident)?):
             $path:expr =>
-            ($($named_self_arg:ident : $named_self_val:expr),*)
+            ($($named_self_arg:ident : $named_self_val:expr),* $(,)?)
             -> ($($path_val:ident: $path_ty:ty),*)
             -> $ret_ty:ident
             $([$($param_val:expr),*])?
@@ -308,12 +313,12 @@ macro_rules! api_get {
             #[cfg(feature = $feature_name)]
             )*
         )?
-        pub fn $name($(&$self,)? $($path_val:$path_ty,)*) -> GetObjectRequest<$ret_ty> {
-            GetObjectRequest::<$ret_ty>::new(
+        pub fn $name($(&$self,)? $($path_val:$path_ty,)*) -> anyhow::Result<GetObjectRequest<$ret_ty>> {
+            Ok(GetObjectRequest::<$ret_ty>::new(
                 format!($path
                     $(,$named_self_arg=$named_self_val)*
                     $(,$path_val=$path_val)*))
-            $($(.add_parameter($param_val))*)?
+            $($(.add_parameter($param_val))*)?)
         }
     };
 
@@ -321,7 +326,7 @@ macro_rules! api_get {
         $(#[$outer:meta])*
         $name:ident ($($self:ident)?):
             $path:expr =>
-            ($($named_self_arg:ident : $named_self_val:expr),*)
+            ($($named_self_arg:ident : $named_self_val:expr),* $(,)?)
             -> ($($path_val:ident: $path_ty:ty),*)
             -> {$ret_name_field:literal :$ret_ty:ty}
             $([$($param_val:expr),*])?
@@ -336,12 +341,12 @@ macro_rules! api_get {
             #[cfg(feature = $feature_name)]
             )*
         )?
-        pub fn $name($(&$self,)? $($path_val:$path_ty,)*) -> GetObjectRequestMap<$ret_ty> {
-            GetObjectRequestMap::<$ret_ty>::new(
+        pub fn $name($(&$self,)? $($path_val:$path_ty,)*) -> anyhow::Result<GetObjectRequestMap<$ret_ty>> {
+            Ok(GetObjectRequestMap::<$ret_ty>::new(
                 format!($path
                     $(,$named_self_arg=$named_self_val)*
                     $(,$path_val=$path_val)*), $ret_name_field.into())
-            $($(.add_parameter($param_val))*)?
+            $($(.add_parameter($param_val))*)?)
         }
     };
 
@@ -349,7 +354,7 @@ macro_rules! api_get {
         $(#[$outer:meta])*
         $name:ident ($($self:ident)?):
             $path:expr =>
-            ($($named_self_arg:ident : $named_self_val:expr),*)
+            ($($named_self_arg:ident : $named_self_val:expr),* $(,)?)
             -> ($($path_val:ident: $path_ty:ty),*)
             -> [$ret_ty:ty]
             $([$($param_val:expr),*])?
@@ -365,12 +370,12 @@ macro_rules! api_get {
             #[cfg(feature = $feature_name)]
             )*
         )?
-        pub fn $name($(&$self,)? $($path_val:$path_ty,)*) -> GetPagedObjectRequest<$ret_ty> {
-            GetPagedObjectRequest::<$ret_ty>::new(
+        pub fn $name($(&$self,)? $($path_val:$path_ty,)*) -> anyhow::Result<GetPagedObjectRequest<$ret_ty>> {
+            Ok(GetPagedObjectRequest::<$ret_ty>::new(
                 format!($path
                     $(,$named_self_arg=$named_self_val)*
                     $(,$path_val=$path_val)*))
-            $($(.add_parameter($param_val))*)?
+            $($(.add_parameter($param_val))*)?)
         }
     };
 }

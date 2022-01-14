@@ -1,5 +1,6 @@
 //! Model for managing files with Canvas.
 
+use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 
 use crate::canvas::CanvasInformation;
@@ -35,40 +36,37 @@ pub struct File {
 
 impl File {
     #[cfg(not(feature = "blocking"))]
-    pub async fn download(
-        &self,
-        canvas: &CanvasInformation<'_>,
-        path: &str,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let url = self.url.clone().unwrap();
-        let name = self.filename.clone().unwrap();
+    pub async fn download(&self, canvas: &CanvasInformation<'_>, path: &str) -> anyhow::Result<()> {
+        let url = self
+            .url
+            .clone()
+            .ok_or_else(|| anyhow!("File url not set"))?;
+        let name = self
+            .filename
+            .clone()
+            .ok_or_else(|| anyhow!("File name not set"))?;
 
-        let mut resp = canvas
-            .get_request(url)
-            .send()
-            .await
-            .unwrap()
-            .bytes()
-            .await
-            .unwrap();
+        let mut resp = canvas.get_request(url).send().await?.bytes().await?;
 
-        std::fs::write(format!("{}/{}", path, name), resp).expect("failed to copy the content");
+        std::fs::write(format!("{path}/{name}"), resp)?;
 
         Ok(())
     }
 
     #[cfg(feature = "blocking")]
-    pub fn download(
-        &self,
-        canvas: &CanvasInformation<'_>,
-        path: &str,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let url = self.url.clone().unwrap();
-        let name = self.filename.clone().unwrap();
+    pub fn download(&self, canvas: &CanvasInformation<'_>, path: &str) -> anyhow::Result<()> {
+        let url = self
+            .url
+            .clone()
+            .ok_or_else(|| anyhow!("File url not set"))?;
+        let name = self
+            .filename
+            .clone()
+            .ok_or_else(|| anyhow!("File name not set"))?;
 
-        let mut resp = canvas.get_request(url).send().unwrap().bytes().unwrap();
+        let mut resp = canvas.get_request(url).send()?.bytes()?;
 
-        std::fs::write(format!("{}/{}", path, name), resp).expect("failed to copy the content");
+        std::fs::write(format!("{path}/{name}"), resp)?;
 
         Ok(())
     }

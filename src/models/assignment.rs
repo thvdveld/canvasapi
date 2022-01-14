@@ -1,6 +1,7 @@
 //! Models for accessing information about assignments.
 
 use serde::{Deserialize, Serialize};
+use anyhow::anyhow;
 
 use crate::canvas::CanvasInformation;
 use crate::models::prelude::*;
@@ -83,26 +84,30 @@ impl Assignment {
         /// List students eligible to submit this assignment.
         get_gradeable_students(self):
             "courses/{course_id}/assignments/{id}/gradeable_students" =>
-            (course_id: self.course_id.clone().unwrap(),
-             id: self.id.clone().unwrap())
-                -> () -> [UserDisplay]
+            (
+                course_id: self.course_id.ok_or_else(|| anyhow!("Field `course_id` missing"))?,
+                id: self.id.ok_or_else(|| anyhow!("Field `id` missing"))?,
+            ) -> () -> [UserDisplay]
     }
 
     api_get! {
         /// Get a single submission, based on user id.
         get_submission(self):
              "courses/{course_id}/assignments/{id}/submissions/{user_id}" =>
-            (course_id: self.course_id.clone().unwrap(), id: self.id.clone().unwrap())
-                -> (user_id: usize) -> Submission
+            (
+                course_id: self.course_id.ok_or_else(|| anyhow!("Field `course_id` missing"))?,
+                id: self.id.ok_or_else(|| anyhow!("Field `id` missing"))?,
+            ) -> (user_id: usize) -> Submission
     }
 
     api_get! {
         /// Get all existing submissions for this assignment.
         get_submissions(self):
             "courses/{course_id}/assignments/{id}/submissions" =>
-            (course_id: self.course_id.clone().unwrap(),
-            id: self.id.clone().unwrap())
-                -> () -> [Submission]
+            (
+                course_id: self.course_id.ok_or_else(|| anyhow!("Field `course_id` missing"))?,
+                id: self.id.ok_or_else(|| anyhow!("Field `id` missing"))?,
+            ) -> () -> [Submission]
     }
 }
 
