@@ -63,6 +63,17 @@ macro_rules! api_parameter {
                 }
             }
         }
+
+        impl std::str::FromStr for $name {
+            type Err = ();
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    $($option_output => Ok(Self::$option),)*
+                    _ => Err(()),
+                }
+            }
+        }
     };
 
     (
@@ -90,6 +101,7 @@ api_parameter! {
 }
 
 api_parameter! {
+    #[derive(Debug)]
     /// Parameter to specify the enrollment type of a user.
     EnrollmentType => "enrollment_type[]",
     Teacher => "teacher",
@@ -101,6 +113,7 @@ api_parameter! {
 }
 
 api_parameter! {
+    #[derive(Debug)]
     /// Parameter to specify on wich field the output is sorted.
     SortOn => "sort",
     Username => "username",

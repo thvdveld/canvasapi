@@ -8,6 +8,11 @@ This client that is used for making the calls is [reqwest](https://crates.io/cra
 The API calls are by default asynchronous.
 The [Tokio](https://crates.io/crates/tokio) runtime is used for the tests.
 
+## `canvas` binary
+
+This binary allows interacting with the Canvas API.
+The output of the binary is JSON.
+
 ## Feature flags
 
 - `blocking`: enables blocking requests.

@@ -20,15 +20,14 @@
 //!
 //! ```
 //! # use canvasapi::prelude::*;
-//! # #[tokio::test]
-//! # async fn get_course_test() {
+//! # tokio_test::block_on(async {
 //! # dotenv::dotenv().ok();
 //! let base_url = std::env::var("CANVAS_BASE_URL").unwrap();
 //! let canvas_token = std::env::var("CANVAS_ACCESS_TOKEN").unwrap();
 //!
 //! let canvas = CanvasInformation::new(&base_url, &canvas_token);
 //! let course = Canvas::get_course(13369).unwrap().fetch(&canvas).await.unwrap().inner();
-//! # }
+//! # });
 //! ```
 //!
 //! # Contributing
