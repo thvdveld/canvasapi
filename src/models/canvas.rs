@@ -224,13 +224,33 @@ impl Canvas {
         searh_accounts()
     }
 
-    api_get! {
-        /// List all the courses visible in the public index.
-        /// Returns a list of dicts, each containing a single course.
-        search_all_courses():
-            "search/all_courses" =>
-                () -> () -> [serde_json::Value]
-            features = [( name = "devel", reason = "The return type is not correct yet.")]
+    /// Returns a list of courses that match the search criteria.
+    pub fn search_course(
+        search: String,
+        public_only: bool,
+        open_enrollment_only: bool,
+    ) -> anyhow::Result<GetPagedObjectRequest<serde_json::Value>> {
+        let mut request = GetPagedObjectRequest::<_>::new("search/all_courses/".to_string())
+            .add_parameter(RequestParameter {
+                name: "search".to_string(),
+                value: search,
+            });
+
+        if public_only {
+            request = request.add_parameter(RequestParameter {
+                name: "public_only".into(),
+                value: public_only.to_string(),
+            });
+        }
+
+        if open_enrollment_only {
+            request = request.add_parameter(RequestParameter {
+                name: "open_enrollment_only".into(),
+                value: open_enrollment_only.to_string(),
+            });
+        }
+
+        Ok(request)
     }
 
     api_todo! {

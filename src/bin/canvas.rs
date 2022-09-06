@@ -49,6 +49,18 @@ enum Commands {
         #[clap(long, value_parser)]
         out_dir: Option<std::path::PathBuf>,
     },
+    /// Search for a course based on a search string.
+    SearchCourse {
+        /// The search terms used.
+        #[clap(value_parser)]
+        search: String,
+        /// Only return courses with public content.
+        #[clap(long)]
+        public_only: bool,
+        /// Only return courses that allow self enrollment.
+        #[clap(long)]
+        open_enrollment_only: bool,
+    },
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Eq, Ord, Copy, Clone, ValueEnum)]
@@ -189,6 +201,19 @@ async fn main() {
                     file.download(&canvas, path).await.unwrap();
                 }
                 "".to_string()
+            }
+            Commands::SearchCourse {
+                search,
+                public_only,
+                open_enrollment_only,
+            } => {
+                let results = Canvas::search_course(search, public_only, open_enrollment_only)
+                    .unwrap()
+                    .fetch(&canvas)
+                    .await
+                    .unwrap()
+                    .inner();
+                serde_json::to_string_pretty(&results).unwrap()
             }
         };
         println!("{data}");

@@ -11,6 +11,9 @@ Possible log types:
 - `[fixed]` for any bug fixes.
 - `[security]` to invite users to upgrade in case of vulnerabilities.
 
+### v0.4.1 (2022-09-06)
+- `[added]` the Canvas search functionality for courses to the canvas binary.
+
 ### v0.4.0 (2022-09-06)
 - `[added]` a binary for interacting with the Canvas API.
 

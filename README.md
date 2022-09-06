@@ -12,6 +12,11 @@ The [Tokio](https://crates.io/crates/tokio) runtime is used for the tests.
 
 This binary allows interacting with the Canvas API.
 The output of the binary is JSON.
+To install:
+
+```
+cargo install canvasapi --bin canvas
+```
 
 ## Feature flags
 
