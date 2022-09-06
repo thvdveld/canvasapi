@@ -38,3 +38,7 @@ blocking = ["reqwest/blocking", "reqwest/json"]
 non_blocking = ["tokio/full", "reqwest/json"]
 
 devel = []
+
+[[bin]]
+name = "canvas"
+required-features = ["non_blocking"]

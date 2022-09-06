@@ -32,8 +32,10 @@ rust-stable-build:
   <<: *rust-stable
   stage: build
   script:
+    - cargo build
+    - cargo build --no-default-features --features "blocking"
     - cargo build --release
-    - cargo build --release --all-features
+    - cargo build --release --no-default-features --features "blocking"
 
 rust-stable-documentation:
   <<: *rust-stable
@@ -48,24 +50,24 @@ rust-nightly-build:
   <<: *rust-nightly
   stage: build
   script:
-    - cargo build --features "devel"
-    - cargo build --all-features
-    - cargo build --release --all-features
+    - cargo build
+    - cargo build --release
+    - cargo build --no-default-features --features "blocking"
+    - cargo build --release --no-default-features --features "blocking"
 
 rust-stable-test:
   <<: *rust-stable
   stage: test
   script:
-    - cargo test --all-features
-    - cargo test --release --all-features
+    - cargo test
+    - cargo test --no-default-features --features "blocking"
 
 rust-nightly-test:
   <<: *rust-nightly
   stage: test
   script:
-    - cargo test --features "devel"
-    - cargo test --all-features
-    - cargo test --release --all-features
+    - cargo test
+    - cargo test --release --no-default-features --features "blocking"
 
 coverage-nightly:
   image: xd009642/tarpaulin:develop-nightly
