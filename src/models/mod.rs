@@ -7,6 +7,8 @@ pub mod file;
 pub mod outcome;
 pub mod submission;
 pub mod user;
+pub mod quiz;
+pub mod todo;
 
 pub mod prelude {
     pub use super::assignment::*;
@@ -16,4 +18,6 @@ pub mod prelude {
     pub use super::outcome::*;
     pub use super::submission::*;
     pub use super::user::*;
+    pub use super::todo::*;
+    pub use super::quiz::*;
 }
