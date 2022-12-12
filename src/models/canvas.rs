@@ -199,7 +199,6 @@ impl Canvas {
         get_todo_items():
             "users/self/todo" =>
                 () -> () -> [Todo]
-            // features = [( name = "devel", reason = "The return type is not correct yet.")]
     }
 
     api_todo! {
