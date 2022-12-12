@@ -2,7 +2,7 @@
 
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
-use serde_json::{Value};
+use serde_json::Value;
 
 use crate::canvas::CanvasInformation;
 use crate::models::prelude::*;
