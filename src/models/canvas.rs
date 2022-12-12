@@ -198,8 +198,8 @@ impl Canvas {
         /// Return the current user's list of todo items, as seen on the user dashboard.
         get_todo_items():
             "users/self/todo" =>
-                () -> () -> [std::collections::HashMap<String,serde_json::Value>]
-            features = [( name = "devel", reason = "The return type is not correct yet.")]
+                () -> () -> [Todo]
+            // features = [( name = "devel", reason = "The return type is not correct yet.")]
     }
 
     api_todo! {
