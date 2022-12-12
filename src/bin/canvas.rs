@@ -37,7 +37,7 @@ enum Commands {
         #[clap(value_parser)]
         course_id: usize,
         /// The enrolment type of the user.
-        #[clap(short, long = "type", arg_enum, value_parser)]
+        #[clap(short, long = "type", value_parser)]
         type_: Option<Enrollment>,
     },
     /// Download files of a course.
