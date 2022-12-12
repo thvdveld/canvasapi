@@ -12,7 +12,7 @@ struct Args {
     #[clap(long)]
     token: Option<String>,
     #[clap(subcommand)]
-    command: Option<Commands>,
+    command: Commands,
 }
 
 #[derive(Subcommand, Debug)]
@@ -109,113 +109,118 @@ async fn main() {
 
     let canvas = CanvasInformation::new(&base_url, &canvas_token);
 
-    if let Some(command) = args.command {
-        let data = match command {
-            Commands::Courses => {
-                let courses = Course::courses()
-                    .unwrap()
-                    .fetch(&canvas)
-                    .await
-                    .unwrap()
-                    .inner();
+    let data = match args.command {
+        Commands::Courses => {
+            let courses = Course::courses()
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
 
-                serde_json::to_string_pretty(&courses).unwrap()
+            serde_json::to_string_pretty(&courses).unwrap()
+        }
+        Commands::Assignments { id } => {
+            let course = Canvas::get_course(id)
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
+
+            let assignments = course
+                .get_assignments()
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
+
+            serde_json::to_string_pretty(&assignments).unwrap()
+        }
+        Commands::Course { id } => {
+            let course = Canvas::get_course(id)
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
+
+            serde_json::to_string_pretty(&course).unwrap()
+        }
+        Commands::Users { course_id, type_ } => {
+            let course = Canvas::get_course(course_id)
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
+
+            let users = course.get_users().unwrap();
+
+            let users = if let Some(type_) = type_ {
+                users.add_parameter(<Enrollment as Into<EnrollmentType>>::into(type_))
+            } else {
+                users
+            };
+
+            let users = match users.fetch(&canvas).await {
+                Ok(users) => users.inner(),
+                Err(e) => {
+                    println!("{}", e);
+                    return;
+                }
+            };
+
+            serde_json::to_string_pretty(&users).unwrap()
+        }
+        Commands::Files { id, out_dir } => {
+            let course = Canvas::get_course(id)
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
+
+            let files = course
+                .get_files()
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
+
+            if let Some(out_dir) = out_dir.as_ref() {
+                if !out_dir.as_path().exists() {
+                    std::fs::create_dir_all(out_dir.as_path()).unwrap();
+                }
             }
-            Commands::Assignments { id } => {
-                let course = Canvas::get_course(id)
-                    .unwrap()
-                    .fetch(&canvas)
-                    .await
-                    .unwrap()
-                    .inner();
 
-                let assignments = course
-                    .get_assignments()
-                    .unwrap()
-                    .fetch(&canvas)
-                    .await
-                    .unwrap()
-                    .inner();
-
-                serde_json::to_string_pretty(&assignments).unwrap()
-            }
-            Commands::Course { id } => {
-                let course = Canvas::get_course(id)
-                    .unwrap()
-                    .fetch(&canvas)
-                    .await
-                    .unwrap()
-                    .inner();
-
-                serde_json::to_string_pretty(&course).unwrap()
-            }
-            Commands::Users { course_id, type_ } => {
-                let course = Canvas::get_course(course_id)
-                    .unwrap()
-                    .fetch(&canvas)
-                    .await
-                    .unwrap()
-                    .inner();
-
-                let users = course.get_users().unwrap();
-
-                let users = if let Some(type_) = type_ {
-                    users.add_parameter(<Enrollment as Into<EnrollmentType>>::into(type_))
+            for file in files {
+                let path = if let Some(ref out_dir) = out_dir {
+                    out_dir.as_path().to_str().unwrap()
                 } else {
-                    users
+                    "."
                 };
 
-                let users = users.fetch(&canvas).await.unwrap().inner();
-
-                serde_json::to_string_pretty(&users).unwrap()
+                file.download(&canvas, path).await.unwrap();
             }
-            Commands::Files { id, out_dir } => {
-                let course = Canvas::get_course(id)
-                    .unwrap()
-                    .fetch(&canvas)
-                    .await
-                    .unwrap()
-                    .inner();
+            "".to_string()
+        }
+        Commands::SearchCourse {
+            search,
+            public_only,
+            open_enrollment_only,
+        } => {
+            let results = Canvas::search_course(search, public_only, open_enrollment_only)
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
+            serde_json::to_string_pretty(&results).unwrap()
+        }
+    };
 
-                let files = course
-                    .get_files()
-                    .unwrap()
-                    .fetch(&canvas)
-                    .await
-                    .unwrap()
-                    .inner();
-
-                if let Some(out_dir) = out_dir.as_ref() {
-                    if !out_dir.as_path().exists() {
-                        std::fs::create_dir_all(out_dir.as_path()).unwrap();
-                    }
-                }
-
-                for file in files {
-                    let path = if let Some(ref out_dir) = out_dir {
-                        out_dir.as_path().to_str().unwrap()
-                    } else {
-                        "."
-                    };
-
-                    file.download(&canvas, path).await.unwrap();
-                }
-                "".to_string()
-            }
-            Commands::SearchCourse {
-                search,
-                public_only,
-                open_enrollment_only,
-            } => {
-                let results = Canvas::search_course(search, public_only, open_enrollment_only)
-                    .unwrap()
-                    .fetch(&canvas)
-                    .await
-                    .unwrap()
-                    .inner();
-                serde_json::to_string_pretty(&results).unwrap()
-            }
-        };
-        println!("{data}");
-    }
+    println!("{data}");
 }
