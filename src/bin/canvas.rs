@@ -61,6 +61,12 @@ enum Commands {
         #[clap(long)]
         open_enrollment_only: bool,
     },
+    /// Get all todo items.
+    Todo {
+        /// The ID of the course.
+        #[clap(value_parser)]
+        course_id: Option<usize>,
+    },
 }
 
 #[derive(Debug, PartialEq, PartialOrd, Eq, Ord, Copy, Clone, ValueEnum)]
@@ -220,7 +226,25 @@ async fn main() {
                 .inner();
             serde_json::to_string_pretty(&results).unwrap()
         }
-    };
+        Commands::Todo { course_id } => {
+            let results = Canvas::get_todo_items()
+                .unwrap()
+                .fetch(&canvas)
+                .await
+                .unwrap()
+                .inner();
 
+            let results = if let Some(course_id) = course_id {
+                results
+                    .into_iter()
+                    .filter(|item| item.course_id == Some(course_id as i64))
+                    .collect()
+            } else {
+                results
+            };
+
+            serde_json::to_string_pretty(&results).unwrap()
+        }
+    };
     println!("{data}");
 }

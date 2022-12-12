@@ -2,6 +2,7 @@
 
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::canvas::CanvasInformation;
 use crate::models::prelude::*;
@@ -19,7 +20,7 @@ pub struct Assignment {
     pub lock_at: Option<String>,
     pub unlock_at: Option<String>,
     pub has_overrides: Option<bool>,
-    pub all_dates: Option<Vec<String>>,
+    pub all_dates: Option<Vec<AllDates>>,
     pub course_id: Option<usize>,
     pub html_url: Option<String>,
     pub submission_download_url: Option<String>,
@@ -53,7 +54,7 @@ pub struct Assignment {
     pub unpublishable: Option<bool>,
     pub only_visible_to_overrides: Option<bool>,
     pub locked_for_user: Option<bool>,
-    pub lock_info: Option<String>,
+    pub lock_info: Option<LockInfo>,
     pub lock_explanation: Option<String>,
     pub quiz_id: Option<usize>,
     pub anonymous_submissions: Option<bool>,
