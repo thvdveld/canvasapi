@@ -203,6 +203,9 @@ where
         mut self,
         canvas: &CanvasInformation<'_>,
     ) -> anyhow::Result<GetObjectResponse<Vec<Output>>> {
+        use anyhow::bail;
+        use reqwest::StatusCode;
+
         let mut output: Vec<Output> = vec![];
         let mut url: String = canvas.add_url_prefix(&self.url);
 
@@ -227,6 +230,12 @@ where
             let mut client = canvas.get_request(url);
 
             let mut resp = client.send().await?;
+
+            match resp.status() {
+                StatusCode::OK => {},
+                status => bail!("{status}"),
+            }
+
             let headers = resp.headers().clone();
 
             let next_url = get_next_url(&headers)?;
